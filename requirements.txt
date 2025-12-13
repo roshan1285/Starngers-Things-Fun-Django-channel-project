@@ -1,0 +1,14 @@
+# Core Django
+Django>=5.0
+
+# WebSockets & Async (Django Channels)
+channels>=4.0
+daphne             # The ASGI server required to run WebSockets
+channels-redis     # Required for the Channel Layer (to talk to Redis)
+
+# Environment Variables (Security best practice)
+python-dotenv
+
+# Utilities (Optional but highly recommended)
+requests           # For making external HTTP requests
+Pillow             # If you plan to handle images/uploads
