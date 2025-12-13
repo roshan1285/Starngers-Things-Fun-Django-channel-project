@@ -12,7 +12,7 @@ def signup(request):
             print(form.errors) 
         if form.is_valid():
             user = form.save()
-            login(request, user) # Auto-login after register
+            auth_login(request, user) # Auto-login after register
             return redirect('home') # Change 'home' to your landing page URL name
     else:
         form = RegisterForm()
