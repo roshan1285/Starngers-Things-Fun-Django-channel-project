@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the Upside Down</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* BASE & RESET */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            /* The Void Background */
+            background-color: #000;
+            background-image: radial-gradient(circle at center, #1a0b0b 0%, #000000 80%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Libre Baskerville', serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* VINTAGE SCANLINE EFFECT (Optional Overlay) */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* THE TITLE CONTAINER */
+        .title-container {
+            z-index: 10;
+            text-align: center;
+            transform: scale(1);
+            animation: breathe 4s infinite ease-in-out;
+        }
+
+        /* THE MAIN TEXT STYLE */
+        h1 {
+            font-size: 5rem; /* Big text */
+            text-transform: uppercase;
+            letter-spacing: -5px; /* Tight spacing like the show */
+            
+            /* The Hollow Red Outline Trick */
+            color: transparent; /* See-through inside */
+            -webkit-text-stroke: 3px #ed213a; /* The Red Outline */
+            
+            /* The Neon Glow */
+            text-shadow: 
+                0 0 15px rgba(237, 33, 58, 0.5),
+                0 0 30px rgba(237, 33, 58, 0.3);
+            
+            position: relative;
+            line-height: 0.9;
+        }
+
+        /* THE BARS ABOVE/BELOW THE TEXT */
+        h1::before, h1::after {
+            content: '';
+            display: block;
+            height: 3px;
+            width: 100%;
+            background: #ed213a;
+            box-shadow: 0 0 10px rgba(237, 33, 58, 0.8);
+            margin: 0 auto;
+        }
+        
+        h1::before { width: 80%; margin-bottom: 10px; } /* Top bar shorter */
+        h1::after { margin-top: 10px; }
+
+        /* FIRST LETTER BIGGER STYLE (Classic Intro Style) */
+        .big-letter {
+            font-size: 6.5rem;
+            vertical-align: middle;
+        }
+
+        /* SUBTEXT/TAGLINE */
+        p.subtitle {
+            color: #ed213a;
+            font-family: 'Courier New', monospace;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px #ed213a;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        /* BOTTOM NAVIGATION AREA */
+        .bottom-nav {
+            position: absolute;
+            bottom: 50px;
+            z-index: 20;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* BUTTON STYLES */
+        .btn {
+            text-decoration: none;
+            color: #fff;
+            padding: 12px 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            border-color: #ed213a;
+            background: rgba(237, 33, 58, 0.1);
+            color: #ed213a;
+            box-shadow: 0 0 15px rgba(237, 33, 58, 0.5);
+        }
+
+        .btn-primary {
+            border-color: #ed213a;
+            color: #ed213a;
+        }
+
+        .btn-primary:hover {
+            background: #ed213a;
+            color: #000;
+        }
+
+        /* RESPONSIVENESS */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; -webkit-text-stroke: 1.5px #ed213a; }
+            .big-letter { font-size: 4rem; }
+        }
+
+        /* ANIMATION */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: brightness(100%); }
+            50% { transform: scale(1.02); filter: brightness(120%); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title-container">
+        <h1>
+            <span class="big-letter">S</span>TRANGE<span class="big-letter">R</span><br>
+            THINGS
+        </h1>
+        <p class="subtitle">WELCOME TO THE HAWKINS</p>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="{% url 'login' %}" class="btn">Log In</a>
+        <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
+    </div>
+
+</body>
+</html>

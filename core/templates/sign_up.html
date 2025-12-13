@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawkins National Lab - New Subject</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CORE SETTINGS --- */
+        :root {
+            --stranger-red: #e71d1a;
+            --glow: #ff3835;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'VT323', monospace;
+        }
+
+        /* --- THE UPSIDE DOWN BACKGROUND --- */
+        .upside-down-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a0505 0%, #000000 80%);
+            z-index: 0;
+        }
+
+        /* Spores / Dust Particles */
+        .spore {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float 10s infinite linear;
+        }
+        .spore:nth-child(1) { top: 10%; left: 20%; animation-duration: 8s; opacity: 0.5; }
+        .spore:nth-child(2) { top: 30%; left: 80%; animation-duration: 12s; opacity: 0.3; }
+        .spore:nth-child(3) { top: 70%; left: 40%; animation-duration: 6s; opacity: 0.6; }
+        .spore:nth-child(4) { top: 50%; left: 10%; animation-duration: 9s; opacity: 0.4; }
+        .spore:nth-child(5) { top: 90%; left: 70%; animation-duration: 11s; opacity: 0.2; }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        }
+
+        /* --- CRT TV SCANLINE OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* --- LOGIN BOX --- */
+        .login-box {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            max-width: 450px; /* Slightly wider for signup fields */
+            padding: 2rem;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .intro-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .chapter-text {
+            color: #fff;
+            font-family: 'Merriweather', serif;
+            font-size: 1rem;
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .main-title {
+            font-family: 'Merriweather', serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--stranger-red);
+            text-transform: uppercase;
+            letter-spacing: -3px;
+            position: relative;
+            display: inline-block;
+            filter: drop-shadow(0 0 15px var(--glow));
+            transform: scaleY(1.1);
+        }
+
+        .bar-top {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--stranger-red);
+            box-shadow: 0 0 10px var(--glow);
+            margin-bottom: 5px;
+        }
+        
+        .bar-bottom {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--stranger-red);
+            box-shadow: 0 0 10px var(--glow);
+            margin-top: 5px;
+        }
+
+        /* --- FORM STYLING --- */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            color: #aaa;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #555;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.4rem;
+            padding: 5px 0;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-bottom: 2px solid var(--stranger-red);
+            box-shadow: 0 10px 20px -10px rgba(231, 29, 26, 0.4);
+        }
+        
+        /* Help text (password rules etc) */
+        .helptext {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* --- BUTTON --- */
+        button {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Merriweather', serif;
+            font-weight: 900;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--stranger-red);
+            background: transparent;
+            border: 2px solid var(--stranger-red);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(231, 29, 26, 0.2);
+            transition: all 0.4s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--stranger-red);
+            color: #000;
+            box-shadow: 0 0 30px var(--glow);
+        }
+
+        /* --- EXTRA LINKS --- */
+        .bottom-links {
+            margin-top: 30px;
+            text-align: center;
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .bottom-links a {
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid var(--stranger-red);
+        }
+        
+        .bottom-links a:hover {
+            color: var(--stranger-red);
+            text-shadow: 0 0 10px var(--glow);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="upside-down-bg">
+        <div class="spore"></div>
+        <div class="spore"></div>
+        <div class="spore"></div>
+        <div class="spore"></div>
+        <div class="spore"></div>
+    </div>
+    
+    <div class="scanlines"></div>
+
+    <div class="login-box">
+        
+        <div class="intro-header">
+            <div class="chapter-text">Chapter Two</div>
+            
+            <span class="bar-top"></span>
+            <div class="main-title">SIGN UP</div>
+            <span class="bar-bottom"></span>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text|safe }}</span>
+                {% endif %}
+
+                {% if field.errors %}
+                    <div style="color: #ff3835; font-size: 1rem; margin-top: 5px;">
+                        ! {{ field.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit">Join the Party</button>
+        </form>
+
+        <div class="bottom-links">
+            <p>Already have an account?</p>
+            <a href="{% url 'login' %}">ENTER HAWKINS</a>
+        </div>
+    </div>
+
+</body>
+</html>

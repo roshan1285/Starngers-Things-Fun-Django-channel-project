@@ -1,0 +1,84 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaTown | Stranger Things Edition</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 1. LOAD YOUR LOCAL FONT */
+        @font-face {
+            font-family: 'StrangerFont';
+            /* MAKE SURE your file in static/fonts/ is named exactly 'stranger.ttf' */
+            src: url("{% static 'fonts/stranger.ttf' %}") format('truetype');
+        }
+
+        /* 2. THEME UTILITIES */
+        body {
+            font-family: 'Roboto Mono', monospace; /* Default to 80s terminal style */
+        }
+        
+        .neon-text {
+            /* Deeper red glow for realism */
+            text-shadow: 
+                0 0 5px #ff0000, 
+                0 0 10px #8b0000, 
+                0 0 20px #8b0000;
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 5px #ff0000, inset 0 0 5px #8b0000;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        /* This maps 'font-stranger' to your local font file */
+                        'stranger': ['StrangerFont', 'serif'], 
+                        'mono': ['"Roboto Mono"', 'monospace'],
+                    },
+                    colors: {
+                        red: {
+                            500: '#ff0000',
+                            900: '#5c0000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-gray-200 h-screen flex flex-col overflow-hidden selection:bg-red-900 selection:text-white">
+
+    <header class="h-20 border-b-2 border-red-900 bg-black flex items-center justify-between px-8 z-50">
+        
+        <div class="text-2xl text-red-600 font-stranger neon-text tracking-widest pt-2">
+            HAWKINS LAB
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <span class="text-red-500 font-bold uppercase tracking-widest text-sm shadow-red-500">
+                OFFICER {{ request.user.username }}
+            </span>
+            
+            <a href="{% url 'logout' %}" class="px-4 py-1 border border-red-700 text-red-600 text-xs hover:bg-red-900 hover:text-white transition uppercase tracking-widest">
+                Log Out
+            </a>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-hidden relative">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>
