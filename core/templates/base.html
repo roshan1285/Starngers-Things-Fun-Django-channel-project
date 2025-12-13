@@ -8,14 +8,14 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet"> {% endcomment %}
     
     <style>
         /* 1. LOAD YOUR LOCAL FONT */
         @font-face {
             font-family: 'StrangerFont';
-            /* MAKE SURE your file in static/fonts/ is named exactly 'stranger.ttf' */
-            src: url("{% static 'fonts/stranger.ttf' %}") format('truetype');
+            /* MAKE SURE your file in static/fonts/ is named exactly 'st_bold.ttf' */
+            src: url("{% static 'fonts/st_bold.ttf' %}") format('truetype');
         }
 
         /* 2. THEME UTILITIES */

@@ -1,20 +1,7 @@
-from rest_framework import serializers
 from django.db import models
 from django.contrib.auth.models import User
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username']
 
-class FriendSerializer(serializers.ModelSerializer):
-    # We use the UserSerializer inside here to get full details
-    request_sender = UserSerializer(read_only=True)
-    receiver = UserSerializer(read_only=True)
-
-    class Meta:
-        model = "Friends"
-        fields = ['id', 'sender', 'receiver', 'status', 'timestamp']
 
 class Friends(models.Model):
     STATUS_CHOICES = (
