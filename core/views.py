@@ -121,7 +121,7 @@ def accept_friend_request(request, user_id):
     friendship.status = 2
     friendship.save()
 
-    return Response({'status':'success','new_state':'accepted'})
+    return Response({'status':'success','new_state':'accepted','frequency' : friendship.frequency})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -137,4 +137,4 @@ def reject_friend_request(request, user_id):
     friendship.status = 3
     friendship.save()
 
-    return Response({'status':'success','new_state':'accepted'})
+    return Response({'status':'success','new_state':'accepted','frequency' : friendship.frequency})

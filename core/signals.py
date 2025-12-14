@@ -14,6 +14,7 @@ def send_radio_update(sender,instance,created ,**kwargs):
             'type': 'incoming_request',
             'sender_id': instance.sender.id,
             'sender_name': instance.sender.username,
+            'frequency' : instance.frequency,
         }
         async_to_sync(channel_layer.group_send)(
             target_group, {'type': 'radio_signal', 'data': data}
@@ -28,11 +29,13 @@ def send_radio_update(sender,instance,created ,**kwargs):
             'type': 'request_accepted',
             'accepter_id': instance.receiver.id,
             'accepter_name': instance.receiver.username,
+            'frequency' : instance.frequency,
         }
         accepter_data = {
             'type': 'request_accepted',
             'requester_id': instance.sender.id,
             'requester_name': instance.sender.username,
+            'frequency' : instance.frequency,
         }
 
         async_to_sync(channel_layer.group_send)(
@@ -45,13 +48,25 @@ def send_radio_update(sender,instance,created ,**kwargs):
     
     # CASE 3: Rejected (Status 3) -> Notify Sender
     elif instance.status == 3:
-        target_group = f"user_{instance.sender.id}_radio"
-        data = {
+        request_target_group = f"user_{instance.sender.id}_radio"
+        rejector_target_group = f"user_{instance.receiver.id}_radio"
+
+        requester_data = {
             'type': 'request_rejected',
             'rejecter_id': instance.receiver.id,
-            'requester_id': instance.sender.id,
+            'frequency' : instance.frequency,
         }
+        rejector_data = {
+            'type': 'request_rejected',
+            'requester_id': instance.sender.id,
+            'frequency' : instance.frequency,
+        }
+
         async_to_sync(channel_layer.group_send)(
-            target_group, {'type': 'radio_signal', 'data': data}
+            request_target_group, {'type': 'radio_signal', 'data': requester_data}
         )
+        async_to_sync(channel_layer.group_send)(
+            rejector_target_group, {'type': 'radio_signal', 'data': rejector_data}
+        )
+
 

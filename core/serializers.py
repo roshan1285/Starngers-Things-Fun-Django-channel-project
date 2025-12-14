@@ -8,10 +8,11 @@ from django.db.models import Q, F, Count
 class UserSearchSerializer(serializers.ModelSerializer):
     friendship_status = serializers.SerializerMethodField()
     friend_count = serializers.SerializerMethodField()
+    frequency = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'friendship_status', 'friend_count']
+        fields = ['id', 'username', 'friendship_status', 'friend_count', 'frequency']
 
     def get_friendship_status(self, obj):
         request_user = self.context.get('request').user
@@ -49,6 +50,21 @@ class UserSearchSerializer(serializers.ModelSerializer):
             (Q(sender=obj) | Q(receiver=obj)) & Q(status=2)
         ).count()
     
+    def get_frequency(self, obj):
+        request_user = self.context.get('request').user
+        
+        # Check for friendship
+        friendship = Friends.objects.filter(
+            (Q(sender=request_user, receiver=obj) | 
+             Q(sender=obj, receiver=request_user))
+        ).first()
+
+        # Logic: Only show Frequency if Accepted (Status 2)
+        # If pending or stranger, return a placeholder like "---"
+        if friendship and friendship.status == 2 and friendship.frequency:
+            return friendship.frequency
+        
+        return "00.0" # Default static for strangers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

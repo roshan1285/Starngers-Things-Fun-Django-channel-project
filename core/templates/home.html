@@ -55,7 +55,7 @@
         
         <div id="radio-antenna" 
              class="absolute bottom-[98%] left-8 w-4 h-6 bg-gradient-to-r from-gray-300 via-white to-gray-400 border border-gray-600 rounded-t-full transition-all duration-1000 ease-in-out z-0 shadow-lg">
-             <div class="absolute -top-1 left-0 w-full h-2 bg-red-600 rounded-t-full border-b border-red-800"></div>
+             <div id="radio-antenna-tip" class="absolute -top-1 left-0 w-full h-2 bg-red-600 rounded-t-full border-b border-red-800 transition-colors duration-500 shadow-[0_0_5px_rgba(220,38,38,0.8)]"></div>
              <div class="absolute top-1/3 w-full h-[1px] bg-gray-400"></div>
              <div class="absolute top-2/3 w-full h-[1px] bg-gray-400"></div>
         </div>
@@ -85,12 +85,15 @@
                 <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white to-transparent opacity-5 rounded-t-xl"></div>
             </div>
 
-            <div class="mx-auto w-64 h-24 bg-[#7a852d] rounded shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] border-4 border-gray-600 mb-6 relative overflow-hidden flex flex-col items-center justify-center">
+            <div class="mx-auto w-64 h-35 bg-[#7a852d] rounded shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] border-4 border-gray-600 mb-6 relative overflow-hidden flex flex-col items-center justify-center">
                 <div class="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-white to-transparent opacity-10 transform skew-x-12"></div>
                 
                 <h2 id="radio-name" class="font-mono text-xl font-bold text-[#1a1f03] tracking-widest z-10 uppercase drop-shadow-sm">
                     --STANDBY--
                 </h2>
+                <div class="flex items-center space-x-2 z-10 mt-1">
+                    <span class="text-[9px] font-bold text-[#2f350b]">FREQ:</span> <span id="radio-frequency" class="font-mono text-2xl font-bold text-[#1a1f03]">00.0</span>
+                </div>
                 <div class="flex items-center space-x-2 z-10 mt-1">
                     <span class="text-[9px] font-bold text-[#2f350b]">CH:</span>
                     <span id="radio-channel" class="font-mono text-2xl font-bold text-[#1a1f03]">00</span>
@@ -171,7 +174,7 @@
             
             // Template Literal for the List Item
             const html = `
-                <div onclick="updateRadio('${user.username}', ${user.friend_count}, ${user.friendship_status}, ${user.id})"
+                <div onclick="updateRadio('${user.username}', '${user.frequency}', ${user.friend_count}, ${user.friendship_status}, ${user.id})"
                     class="flex items-center p-3 cursor-pointer hover:bg-red-900/20 border-b border-red-900/30 transition group">
                     
                     <div class="w-8 h-8 bg-gray-800 text-red-500 border border-red-800 rounded flex items-center justify-center font-mono text-xs font-bold">
@@ -181,6 +184,7 @@
                     <div class="ml-3">
                         <p class="text-red-400 font-mono text-sm group-hover:text-red-300">${user.username}</p>
                         <p class="text-[10px] text-gray-500 font-mono uppercase">CH ${user.friend_count}</p>
+                        <p class="text-[10px] text-gray-500 font-mono uppercase">FREQ: ${user.frequency}</p>
                     </div>
                 </div>
             `;
@@ -191,17 +195,20 @@
     // DOM Elements for the Radio
     const radioName = document.getElementById('radio-name');
     const radioChannel = document.getElementById('radio-channel');
+    const radioFrequency = document.getElementById('radio-frequency');
     const radioAntenna = document.getElementById('radio-antenna');
     const radioBtn = document.getElementById('radio-btn');
+    const radioAntennaTip = document.getElementById('radio-antenna-tip');
 
     let currentSelectedId = null;
 
-    function updateRadio(username, count, status, userId) {
+    function updateRadio(username, freq, count, status, userId) {
         currentSelectedId = userId;
         status = Number(status);
         // 1. Update Screen Text
         radioName.innerText = username.toUpperCase();
         radioChannel.innerText = count.toString().padStart(2, '0'); // Turns 5 into 05
+        radioFrequency.innerText = freq;
 
         // 2. ANTENNA LOGIC (Inflated vs Not Inflated)
         if (status === 2) {
@@ -209,11 +216,18 @@
             radioAntenna.style.height = "240px"; // Tall
             radioAntenna.classList.remove('bg-gray-400');
             radioAntenna.classList.add('bg-green-400'); // Signal Green
+
+            radioAntennaTip.classList.remove('bg-red-600', 'border-red-800', 'shadow-[0_0_5px_rgba(220,38,38,0.8)]');
+            radioAntennaTip.classList.add('bg-green-500', 'border-green-700', 'shadow-[0_0_15px_#22c55e]');
+
         } else {
             // Strangers: Retract Antenna
             radioAntenna.style.height = "24px"; // Short
             radioAntenna.classList.remove('bg-green-400');
             radioAntenna.classList.add('bg-gray-400');
+
+            radioAntennaTip.classList.remove('bg-green-500', 'border-green-700', 'shadow-[0_0_15px_#22c55e]');
+            radioAntennaTip.classList.add('bg-red-600', 'border-red-800', 'shadow-[0_0_5px_rgba(220,38,38,0.8)]');
         }
 
         // 3. BUTTON LOGIC (Get on same Channel)
@@ -246,10 +260,10 @@
             radioBtn.innerText = "OPEN COMMS"; // Already Friends
             radioBtn.className = "w-full h-16 bg-green-800 text-green-100 font-bold tracking-widest uppercase hover:bg-green-700 border-b-4 border-green-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
         }
-        //else if (status === 3) {
-        //    radioBtn.innerText = "TEST PATTERN";
-        //    radioBtn.className = "w-full h-16 bg-gray-700 text-gray-500 cursor-not-allowed border-b-4 border-gray-900 rounded-lg";
-        //}
+        else if (status === 3) {
+            radioBtn.innerText = "Rejected";
+            radioBtn.className = "w-full h-16 bg-gray-700 text-gray-500 cursor-not-allowed border-b-4 border-gray-900 rounded-lg";
+        }
         else if (status === 5) {
             // A. Main Button = Accept
             radioBtnText.innerText = "COPY THAT (ACCEPT)"; 
@@ -278,10 +292,10 @@
         .then(data => {
             if(data.status === 'success'){
                 if(action === 'accept'){
-                    updateRadio(radioName.innerText, parseInt(radioChannel.innerText), 2, userId);
+                    updateRadio(radioName.innerText,data.frequency, parseInt(radioChannel.innerText), 2, userId);
                     document.getElementById('radio-antenna').style.height = '240px';
                 }else{
-                    updateRadio(radioName.innerText, parseInt(radioChannel.innerText), 0, userId);
+                    updateRadio(radioName.innerText, data.frequency ,parseInt(radioChannel.innerText), 0, userId);
                 }
             }
         });
@@ -343,14 +357,14 @@
             // If I am currently looking at the person who accepted me
             if (currentSelectedId === data.accepter_id ) {
                 // Update Radio to "Open Comms" instantly
-                updateRadio(data.accepter_name, '??', 2, data.accepter_id);
+                updateRadio(data.accepter_name, data.frequency, '??', 2, data.accepter_id);
                 document.getElementById('radio-antenna').style.height = '240px';
                 
                 // Play a success sound?
             }
             if (currentSelectedId === data.requester_id ) {
                 // Update Radio to "Open Comms" instantly
-                updateRadio(data.requester_name, '??', 2, data.requester_id);
+                updateRadio(data.requester_name,data.frequency, '??', 2, data.requester_id);
                 document.getElementById('radio-antenna').style.height = '240px';
                 
                 // Play a success sound?
@@ -361,15 +375,18 @@
         else if (data.type === 'incoming_request') {
              // If I am currently looking at the person who sent it
              if (currentSelectedId === data.sender_id) {
-                updateRadio(data.sender_name, '??', 5, data.sender_id);
+                updateRadio(data.sender_name,data.frequency, '??', 5, data.sender_id);
              }
              // Notify user visually (Red dot?)
         }
 
         else if (data.type === 'request_rejected') {
-             if (currentSelectedId === data.rejecter_id) {
-                updateRadio(radioName.innerText, '00', 0, data.rejecter_id);
-             }
+            if (currentSelectedId === data.rejecter_id) {
+                updateRadio(radioName.innerText,data.frequency, '00', 3, data.rejecter_id);
+            }
+            if (currentSelectedId === data.requester_id) {
+                updateRadio(radioName.innerText,data.frequency, '00', 3, data.requester_id);
+            }
         }
     };
 
