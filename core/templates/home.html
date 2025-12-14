@@ -14,7 +14,7 @@
 
         <div class="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-hide">
             
-            <div class="flex items-center p-3 cursor-pointer hover:bg-red-900/20 border border-transparent hover:border-red-900 transition group">
+            {% comment %} <div class="flex items-center p-3 cursor-pointer hover:bg-red-900/20 border border-transparent hover:border-red-900 transition group">
                 <div class="w-8 h-8 bg-red-900 rounded-full flex items-center justify-center text-xs text-white font-bold">
                     W
                 </div>
@@ -42,7 +42,7 @@
                     <p class="text-gray-500 font-bold text-sm group-hover:text-gray-300 transition">Eleven</p>
                     <p class="text-xs text-gray-600 font-mono uppercase">Offline</p>
                 </div>
-            </div>
+            </div> {% endcomment %}
 
         </div>
     </aside>
@@ -194,7 +194,10 @@
     const radioAntenna = document.getElementById('radio-antenna');
     const radioBtn = document.getElementById('radio-btn');
 
+    let currentSelectedId = null;
+
     function updateRadio(username, count, status, userId) {
+        currentSelectedId = userId;
         status = Number(status);
         // 1. Update Screen Text
         radioName.innerText = username.toUpperCase();
@@ -323,5 +326,55 @@
             }
         });
     }
+
+    const wsScheme = window.location.protocol === 'https:'? 'wss':'ws';
+    const radioSocket = new WebSocket(
+        wsScheme + '://' + window.location.host + '/ws/radio/'
+    );
+    radioSocket.onopen= function(e){
+        console.log("Radio Connected.");
+        fetchUsers('');
+
+    };
+    radioSocket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+        console.log("Radio Signal Received: ", data)
+        if (data.type === 'request_accepted') {
+            // If I am currently looking at the person who accepted me
+            if (currentSelectedId === data.accepter_id ) {
+                // Update Radio to "Open Comms" instantly
+                updateRadio(data.accepter_name, '??', 2, data.accepter_id);
+                document.getElementById('radio-antenna').style.height = '240px';
+                
+                // Play a success sound?
+            }
+            if (currentSelectedId === data.requester_id ) {
+                // Update Radio to "Open Comms" instantly
+                updateRadio(data.requester_name, '??', 2, data.requester_id);
+                document.getElementById('radio-antenna').style.height = '240px';
+                
+                // Play a success sound?
+            }
+            // Optional: Refresh the sidebar list to show them as friend
+            fetchUsers(''); 
+        }
+        else if (data.type === 'incoming_request') {
+             // If I am currently looking at the person who sent it
+             if (currentSelectedId === data.sender_id) {
+                updateRadio(data.sender_name, '??', 5, data.sender_id);
+             }
+             // Notify user visually (Red dot?)
+        }
+
+        else if (data.type === 'request_rejected') {
+             if (currentSelectedId === data.rejecter_id) {
+                updateRadio(radioName.innerText, '00', 0, data.rejecter_id);
+             }
+        }
+    };
+
+    radioSocket.onclose = function(e) {
+        console.error('Radio link lost (Socket closed)');
+    };
 </script>
 {% endblock %}

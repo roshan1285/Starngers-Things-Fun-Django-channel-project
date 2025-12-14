@@ -77,7 +77,7 @@ def search_users(request):
             if f.sender == user:
                 friend_ids.append(f.receiver.id)
             else:
-                friend_ids.append(f.request_sender.id)
+                friend_ids.append(f.sender.id)
         
         users = User.objects.filter(id__in=friend_ids)[:10]
 
