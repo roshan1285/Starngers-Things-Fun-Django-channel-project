@@ -4,8 +4,10 @@ from django.contrib.auth import logout as auth_logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Count
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Friends
 from .serializers import UserSearchSerializer
@@ -67,7 +69,7 @@ def search_users(request):
         # DEFAULT: Show only my accepted friends (Limit 10)
         # We find friend IDs first
         friend_ships = Friends.objects.filter(
-            (Q(sender=user) | Q(receiver=user)) & Q(status='accepted')
+            (Q(sender=user) | Q(receiver=user)) & Q(status=2)
         )
         # Extract the IDs of the OTHER person
         friend_ids = []
@@ -82,3 +84,57 @@ def search_users(request):
     # Pass 'request' to serializer context so it knows who YOU are
     serializer = UserSearchSerializer(users, many=True, context={'request': request})
     return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_friend_request(request, user_id):
+    receiver = get_object_or_404(User, id=user_id)
+    sender = request.user
+
+    existing_friendship = Friends.objects.filter(
+        (Q(sender=sender, receiver=receiver) |
+        Q(sender=receiver, receiver=sender))
+    ).first()
+
+    if existing_friendship:
+        return Response({'status':'error','message':'Signal already established or pending.'})
+    
+    new_friendship = Friends.objects.create(
+        sender=sender,
+        receiver=receiver,
+        status=1
+    )
+
+    return Response({'status':'success','new_state':'sent'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def accept_friend_request(request, user_id):
+    sender = get_object_or_404(User, id=user_id)
+    receiver = request.user
+
+    friendship = Friends.objects.filter(sender=sender,receiver=receiver,status=1).first()
+
+    if not friendship:
+        return Response({'status':'error','message':'No incoming signal found.'})
+    
+    friendship.status = 2
+    friendship.save()
+
+    return Response({'status':'success','new_state':'accepted'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reject_friend_request(request, user_id):
+    sender = get_object_or_404(User, id=user_id)
+    receiver = request.user
+
+    friendship = Friends.objects.filter(sender=sender,receiver=receiver,status=1).first()
+
+    if not friendship:
+        return Response({'status':'error','message':'No incoming signal foung.'})
+    
+    friendship.status = 3
+    friendship.save()
+
+    return Response({'status':'success','new_state':'accepted'})

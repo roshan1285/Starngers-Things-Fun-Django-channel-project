@@ -6,7 +6,6 @@ from .models import Friends
 from django.db.models import Q, F, Count
 
 class UserSearchSerializer(serializers.ModelSerializer):
-    # We add these two custom fields that aren't in the User database table
     friendship_status = serializers.SerializerMethodField()
     friend_count = serializers.SerializerMethodField()
 
@@ -14,36 +13,40 @@ class UserSearchSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'friendship_status', 'friend_count']
 
-    # Logic: Calculate the relationship between Request User and THIS User
     def get_friendship_status(self, obj):
-        # 'obj' is the user we are looking at in the search result
-        # 'request.user' is YOU (the person searching)
         request_user = self.context.get('request').user
-
+        
         if obj == request_user:
-            return 'self'
+            return 4 # Self
 
-        # Check database for a link
+        # Check for relationship
+        # Note: Using 'sender' because you updated your model
         friendship = Friends.objects.filter(
             (Q(sender=request_user, receiver=obj) | 
              Q(sender=obj, receiver=request_user))
         ).first()
 
         if not friendship:
-            return 'none' # Strangers
+            return 0 # Stranger (No Signal)
         
-        # If pending, we need to know who sent it
-        if friendship.status == 'pending':
+        current_status = int(friendship.status)
+        # LOGIC FOR PENDING REQUESTS
+        if current_status == 1: 
+            # If YOU sent the request
             if friendship.sender == request_user:
-                return 'sent' # You sent it
-            return 'received' # They sent it to you
-            
-        return friendship.status # 'accepted' or 'rejected'
+                return 1 # "Tuning..." (Yellow Button)
+            # If THEY sent the request
+            else:
+                return 5 # "INCOMING!" (Green Accept Button)
+        
+        # If Accepted (2) or Rejected (3)
+        return current_status 
 
-    # Logic: Count how many accepted friends this person has
+
     def get_friend_count(self, obj):
+        # Change 'accepted' to 2
         return Friends.objects.filter(
-            (Q(sender=obj) | Q(receiver=obj)) & Q(status='accepted')
+            (Q(sender=obj) | Q(receiver=obj)) & Q(status=2)
         ).count()
     
 class UserSerializer(serializers.ModelSerializer):

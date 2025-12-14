@@ -97,19 +97,18 @@
                 </div>
             </div>
 
-            <div class="px-4 pb-6">
+            <div class="px-4 pb-6 flex flex-col gap-3">
                 <button id="radio-btn" 
                         class="relative w-full h-16 bg-gradient-to-b from-gray-700 to-gray-800 rounded-lg shadow-[0_5px_0_#1f2937,0_10px_10px_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-[5px] active:border-t-4 active:border-black transition-all border-t border-gray-600 group-hover:from-gray-600 group-hover:to-gray-700">
                     
-                    <span class="text-gray-300 font-bold tracking-[0.2em] uppercase text-sm drop-shadow-md">
+                    <span id="radio-btn-text" class="text-gray-300 font-bold tracking-[0.2em] uppercase text-sm drop-shadow-md">
                         PUSH TO SCAN
                     </span>
+                    </button>
 
-                    <div class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-8 flex flex-col gap-1 opacity-30">
-                        <div class="h-0.5 bg-black w-full"></div>
-                        <div class="h-0.5 bg-black w-full"></div>
-                        <div class="h-0.5 bg-black w-full"></div>
-                    </div>
+                <button id="reject-btn" 
+                        class="hidden w-full h-10 bg-red-950 border border-red-700 text-red-500 font-mono text-xs uppercase tracking-widest hover:bg-red-900 hover:text-red-200 transition rounded shadow-[inset_0_0_10px_black]">
+                    CUT SIGNAL (REJECT)
                 </button>
             </div>
 
@@ -172,7 +171,7 @@
             
             // Template Literal for the List Item
             const html = `
-                <div onclick="updateRadio('${user.username}', ${user.friend_count}, '${user.friendship_status}', ${user.id})"
+                <div onclick="updateRadio('${user.username}', ${user.friend_count}, ${user.friendship_status}, ${user.id})"
                     class="flex items-center p-3 cursor-pointer hover:bg-red-900/20 border-b border-red-900/30 transition group">
                     
                     <div class="w-8 h-8 bg-gray-800 text-red-500 border border-red-800 rounded flex items-center justify-center font-mono text-xs font-bold">
@@ -196,12 +195,13 @@
     const radioBtn = document.getElementById('radio-btn');
 
     function updateRadio(username, count, status, userId) {
+        status = Number(status);
         // 1. Update Screen Text
         radioName.innerText = username.toUpperCase();
         radioChannel.innerText = count.toString().padStart(2, '0'); // Turns 5 into 05
 
         // 2. ANTENNA LOGIC (Inflated vs Not Inflated)
-        if (status === 'accepted') {
+        if (status === 2) {
             // Friends: Extend Antenna fully
             radioAntenna.style.height = "240px"; // Tall
             radioAntenna.classList.remove('bg-gray-400');
@@ -217,27 +217,111 @@
         configureRadioButton(status, userId);
     }
 
+    // 1. SELECT THE NEW BUTTON
+    const rejectBtn = document.getElementById('reject-btn');
+    const radioBtnText = document.getElementById('radio-btn-text');
+
     function configureRadioButton(status, userId) {
         // Reset basic styles
         radioBtn.onclick = null;
-        
-        if (status === 'none') {
-            radioBtn.innerText = "GET ON SAME CHANNEL"; // Send Request
+        rejectBtn.onclick = null;
+        rejectBtn.classList.add('hidden'); // Hide reject by default
+
+        if (status === 0) {
+            radioBtn.innerText = "BROADCAST SIGNAL"; // Send Request
             radioBtn.className = "w-full h-16 bg-red-900 text-red-200 font-bold tracking-widest uppercase hover:bg-red-800 border-b-4 border-red-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
+            radioBtn.onclick = function() {
+                sendRequestSignal(userId);
+            };
             // Add click event later for API call
         } 
-        else if (status === 'accepted') {
-            radioBtn.innerText = "OPEN COMMS"; // Already Friends
-            radioBtn.className = "w-full h-16 bg-green-800 text-green-100 font-bold tracking-widest uppercase hover:bg-green-700 border-b-4 border-green-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
-        }
-        else if (status === 'sent') {
+        else if (status === 1) {
             radioBtn.innerText = "TUNING..."; // Pending
             radioBtn.className = "w-full h-16 bg-yellow-800 text-yellow-100 font-bold tracking-widest uppercase cursor-wait border-b-4 border-yellow-950 rounded-lg";
         }
-        else if (status === 'self') {
-            radioBtn.innerText = "TEST PATTERN";
-            radioBtn.className = "w-full h-16 bg-gray-700 text-gray-500 cursor-not-allowed border-b-4 border-gray-900 rounded-lg";
+        else if (status === 2) {
+            radioBtn.innerText = "OPEN COMMS"; // Already Friends
+            radioBtn.className = "w-full h-16 bg-green-800 text-green-100 font-bold tracking-widest uppercase hover:bg-green-700 border-b-4 border-green-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
         }
+        //else if (status === 3) {
+        //    radioBtn.innerText = "TEST PATTERN";
+        //    radioBtn.className = "w-full h-16 bg-gray-700 text-gray-500 cursor-not-allowed border-b-4 border-gray-900 rounded-lg";
+        //}
+        else if (status === 5) {
+            // A. Main Button = Accept
+            radioBtnText.innerText = "COPY THAT (ACCEPT)"; 
+            radioBtn.className = "relative w-full h-16 bg-gradient-to-b from-green-600 to-green-800 text-white animate-pulse rounded-lg shadow-[0_5px_0_#14532d] active:translate-y-[5px] active:shadow-none transition border-t border-green-500";
+            radioBtn.onclick = () => handleRequest(userId, 'accept');
+
+            // B. Show Reject Button
+            rejectBtn.classList.remove('hidden');
+            rejectBtn.onclick = () => handleRequest(userId, 'reject');
+        }
+    }
+
+    function handleRequest(userId, action){
+        const url = action === 'accept'
+            ? `/api/accept-request/${userId}/`
+            : `/api/reject-request/${userId}/`;
+
+        fetch(url, {
+            method:'POST',
+            headers:{
+                'X-CSRFToken':getCookie('csrftoken'),
+                'Content-Type':'application/json'
+            }
+        })
+        .then(res => response.json())
+        .then(data => {
+            if(data.status === 'success'){
+                if(action === 'accept'){
+                    updateRadio(radioName.innerText, parseInt(radioChannel.innerText), 2, userId);
+                    document.getElementById('radio-antenna').style.height = '240px';
+                }else{
+                    updateRadio(radioName.innerText, parseInt(radioChannel.innerText), 0, userId);
+                }
+            }
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function sendRequestSignal(userId){
+        const btn = document.getElementById('radio-btn');
+
+        btn.innerText = "BROADCASTING...";
+        btn.classList.add('cursor-wait');
+
+        fetch(`/api/send-request/${userId}/`, {
+            method:'POST',
+            headers:{
+                'X-CSRFToken':getCookie('csrftoken'),
+                'Content-Type':'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === "success"){
+                console.log("Signal Sent!")
+                configureRadioButton(1,userId);
+
+            }else{
+                console.error("Signal Jammed:", data.message);
+            }
+        });
     }
 </script>
 {% endblock %}
