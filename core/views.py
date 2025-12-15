@@ -138,3 +138,6 @@ def reject_friend_request(request, user_id):
     friendship.save()
 
     return Response({'status':'success','new_state':'accepted','frequency' : friendship.frequency})
+
+def test_hawkins_view(request):
+    return render(request, 'test_hawkins.html')

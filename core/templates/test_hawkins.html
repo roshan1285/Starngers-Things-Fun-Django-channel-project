@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stranger Things Wall - Image Overlay</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container ensures the glow spots stay aligned with the image 
+           regardless of screen aspect ratio */
+        .wall-container {
+            position: relative;
+            width: 100%;
+            max-width: 1600px; /* Limits width to keep image sharp */
+            aspect-ratio: 4/3; /* Adjust this to match your image aspect ratio */
+            background-image: url("{% static 'bg/bg_1.png' %}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* The Glow Spot */
+        .bulb-glow {
+            position: absolute;
+            width: 60px; /* Size of the light bloom */
+            height: 60px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%); /* Centers the div on the coordinate */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease-out;
+            
+            /* The Magic: This creates the "Light" effect */
+            background: radial-gradient(circle, rgba(255,255,255,1) 0%, var(--glow-color) 40%, transparent 70%);
+            
+            /* Blends the color into the photo underneath */
+            mix-blend-mode: hard-light;
+            
+            /* Adds a second layer of soft glow */
+            filter: blur(5px) brightness(1.5);
+            z-index: 10;
+        }
+
+        /* Active State */
+        .bulb-glow.active {
+            opacity: 1;
+            /* Extra outer glow for intensity */
+            box-shadow: 0 0 20px 10px var(--glow-color);
+        }
+
+        /* --- POSITION MAPPING (Based on the attached image) --- */
+        /* Colors approximated from image */
+
+        /* ROW 1 */
+        #light-A { top: 22%; left: 25%; --glow-color: rgba(200, 200, 255, 0.9); } /* White/Blue */
+        #light-B { top: 21.3%; left: 31.3%; --glow-color: rgba(30, 80, 255, 0.9); }  /* Blue */
+        #light-C { top: 22%; left: 36%; --glow-color: rgba(255, 30, 30, 0.9); }  /* Red */
+        #light-D { top: 22.5%; left: 45.4%; --glow-color: rgba(30, 200, 60, 0.9); }  /* Green */
+        #light-E { top: 22%; left: 50.4%; --glow-color: rgba(44, 90, 253, 0.9); } /* White/Blue */
+        #light-F { top: 23.5%; left: 59.7%; --glow-color: rgba(255, 220, 0, 0.9); }  /* Yellow */
+        #light-G { top: 24%; left: 63.5%; --glow-color: rgba(255, 40, 40, 0.9); }  /* Red */
+        #light-H { top: 20.9%; left: 72%; --glow-color: rgba(22, 64, 214, 0.925); }   /* Green */
+
+        /* ROW 2 */
+        #light-I { top: 34.4%; left: 17%; --glow-color: rgba(40, 200, 100, 0.9); } /* Green/Cyan */
+        #light-J { top: 37.4%; left: 26.6%; --glow-color: rgba(200, 50, 150, 0.9); } /* Pink/Purple */
+        #light-K { top: 38%; left: 32%; --glow-color: rgba(30, 80, 255, 0.9); }  /* Blue */
+        #light-L { top: 38.7%; left: 38.8%; --glow-color: rgba(40, 200, 100, 0.9); }  /* Yellow */
+        #light-M { top: 38.6%; left: 45.8%; --glow-color: rgba(255, 220, 0, 0.9); } /* Orange  rgba(255, 120, 20, 0.9);*/
+        #light-N { top: 35.5%; left: 51.6%; --glow-color: rgba(255, 30, 30, 0.9); }  /* Red */
+        #light-O { top: 33%; left: 58.2%; --glow-color: rgb(255, 10, 10); }  /* Green */
+        #light-P { top: 33.8%; left: 64.8%; --glow-color: rgba(18, 129, 39, 0.9); } /* Pink */
+        #light-Q { top: 34.5%; left: 78.6%; --glow-color: rgba(255, 120, 20, 0.9); }  /* Blue */
+
+        /* ROW 3 */
+        #light-R { top: 49.7%; left: 21.8%; --glow-color: rgba(6, 99, 23, 0.973); }  /* Yellow */
+        #light-S { top: 51.3%; left: 28%; --glow-color: rgba(252, 97, 244, 0.9); }  /* Red */
+        #light-T { top: 53%; left: 33%; --glow-color: rgba(255, 221, 0, 0.938); }  /* Green */
+        #light-U { top: 52.5%; left: 40.5%; --glow-color: rgba(4, 0, 250, 0.9); }  /* Blue/Purple */
+        #light-V { top: 52.6%; left: 47.7%; --glow-color: rgba(255, 100, 100, 0.9); }/* Pink/Red */
+        #light-W { top: 51.4%; left: 53.8%; --glow-color: rgba(30, 200, 60, 0.9); }  /* Orange */
+        #light-X { top: 50.7%; left: 59.7%; --glow-color: rgba(255, 220, 0, 0.9); }  /* Cyan */
+        #light-Y { top: 49.5%; left: 67.1%; --glow-color: rgba(250, 55, 20, 0.9); }  /* Blue */
+        #light-Z { top: 49.8%; left: 77%; --glow-color: rgba(255, 30, 30, 0.9);  }  /* Red */
+
+        /* UI Hint */
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            color: rgba(255,255,255,0.3);
+            font-family: monospace;
+            z-index: 100;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="wall-container">
+        <div id="light-A" class="bulb-glow"></div>
+        <div id="light-B" class="bulb-glow"></div>
+        <div id="light-C" class="bulb-glow"></div>
+        <div id="light-D" class="bulb-glow"></div>
+        <div id="light-E" class="bulb-glow"></div>
+        <div id="light-F" class="bulb-glow"></div>
+        <div id="light-G" class="bulb-glow"></div>
+        <div id="light-H" class="bulb-glow"></div>
+        
+        <div id="light-I" class="bulb-glow"></div>
+        <div id="light-J" class="bulb-glow"></div>
+        <div id="light-K" class="bulb-glow"></div>
+        <div id="light-L" class="bulb-glow"></div>
+        <div id="light-M" class="bulb-glow"></div>
+        <div id="light-N" class="bulb-glow"></div>
+        <div id="light-O" class="bulb-glow"></div>
+        <div id="light-P" class="bulb-glow"></div>
+        <div id="light-Q" class="bulb-glow"></div>
+        
+        <div id="light-R" class="bulb-glow"></div>
+        <div id="light-S" class="bulb-glow"></div>
+        <div id="light-T" class="bulb-glow"></div>
+        <div id="light-U" class="bulb-glow"></div>
+        <div id="light-V" class="bulb-glow"></div>
+        <div id="light-W" class="bulb-glow"></div>
+        <div id="light-X" class="bulb-glow"></div>
+        <div id="light-Y" class="bulb-glow"></div>
+        <div id="light-Z" class="bulb-glow"></div>
+    </div>
+    
+    <div class="hint">TYPE A-Z TO SIGNAL</div>
+
+    <script>
+        const lights = {
+            'A': document.getElementById('light-A'),
+            'B': document.getElementById('light-B'),
+            'C': document.getElementById('light-C'),
+            'D': document.getElementById('light-D'),
+            'E': document.getElementById('light-E'),
+            'F': document.getElementById('light-F'),
+            'G': document.getElementById('light-G'),
+            'H': document.getElementById('light-H'),
+            'I': document.getElementById('light-I'),
+            'J': document.getElementById('light-J'),
+            'K': document.getElementById('light-K'),
+            'L': document.getElementById('light-L'),
+            'M': document.getElementById('light-M'),
+            'N': document.getElementById('light-N'),
+            'O': document.getElementById('light-O'),
+            'P': document.getElementById('light-P'),
+            'Q': document.getElementById('light-Q'),
+            'R': document.getElementById('light-R'),
+            'S': document.getElementById('light-S'),
+            'T': document.getElementById('light-T'),
+            'U': document.getElementById('light-U'),
+            'V': document.getElementById('light-V'),
+            'W': document.getElementById('light-W'),
+            'X': document.getElementById('light-X'),
+            'Y': document.getElementById('light-Y'),
+            'Z': document.getElementById('light-Z')
+        };
+
+        const activeKeys = new Set();
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (lights[key] && !activeKeys.has(key)) {
+                activeKeys.add(key);
+                lights[key].classList.add('active');
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toUpperCase();
+            if (lights[key]) {
+                activeKeys.delete(key);
+                lights[key].classList.remove('active');
+            }
+        });
+    </script>
+
+</body>
+</html>

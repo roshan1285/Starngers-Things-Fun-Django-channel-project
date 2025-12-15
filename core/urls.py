@@ -15,4 +15,6 @@ urlpatterns = [
 
     path('api/accept-request/<int:user_id>/', views.accept_friend_request, name="accept_friend_request"),
     path('api/reject-request/<int:user_id>/', views.reject_friend_request, name='reject_friend_request'),
+
+    path('test/', views.test_hawkins_view, name='test_hawkins_view'),
 ]
