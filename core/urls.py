@@ -17,4 +17,5 @@ urlpatterns = [
     path('api/reject-request/<int:user_id>/', views.reject_friend_request, name='reject_friend_request'),
 
     path('test/', views.test_hawkins_view, name='test_hawkins_view'),
+    path('wall/<str:frequency>/', views.wall_room, name='wall_room'),
 ]

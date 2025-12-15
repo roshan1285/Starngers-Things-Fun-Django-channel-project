@@ -61,7 +61,8 @@ class UserSearchSerializer(serializers.ModelSerializer):
 
         # Logic: Only show Frequency if Accepted (Status 2)
         # If pending or stranger, return a placeholder like "---"
-        if friendship and friendship.status == 2 and friendship.frequency:
+        if friendship and friendship.status == "2" and friendship.frequency:
+            print(f"there is the frequency, from {request_user.username}, {friendship.frequency} ")
             return friendship.frequency
         
         return "00.0" # Default static for strangers

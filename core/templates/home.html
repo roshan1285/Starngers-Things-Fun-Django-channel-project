@@ -201,9 +201,11 @@
     const radioAntennaTip = document.getElementById('radio-antenna-tip');
 
     let currentSelectedId = null;
+    let currentFrequency = null;
 
     function updateRadio(username, freq, count, status, userId) {
         currentSelectedId = userId;
+        currentFrequency = freq;
         status = Number(status);
         // 1. Update Screen Text
         radioName.innerText = username.toUpperCase();
@@ -244,6 +246,11 @@
         rejectBtn.onclick = null;
         rejectBtn.classList.add('hidden'); // Hide reject by default
 
+        let safeFreq = currentFrequency;
+        if (safeFreq === 'null' || safeFreq === 'None' || safeFreq === 'undefined') {
+            safeFreq = null;
+        }
+
         if (status === 0) {
             radioBtn.innerText = "BROADCAST SIGNAL"; // Send Request
             radioBtn.className = "w-full h-16 bg-red-900 text-red-200 font-bold tracking-widest uppercase hover:bg-red-800 border-b-4 border-red-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
@@ -259,6 +266,16 @@
         else if (status === 2) {
             radioBtn.innerText = "OPEN COMMS"; // Already Friends
             radioBtn.className = "w-full h-16 bg-green-800 text-green-100 font-bold tracking-widest uppercase hover:bg-green-700 border-b-4 border-green-950 active:border-b-0 active:translate-y-1 transition rounded-lg";
+            radioBtn.onclick = function() {
+                // Stricter check to ensure we don't redirect to bad URLs
+                if (safeFreq && safeFreq !== '00.0' && safeFreq !== 0) {
+                    console.log("Opening comms channel:", safeFreq);
+                    window.location.href = `/wall/${safeFreq}/`;
+                } else {
+                    console.error("Signal Lost: Invalid Frequency detected", safeFreq);
+                    alert("COMMUNICATION ERROR: No frequency established.");
+                }
+            };
         }
         else if (status === 3) {
             radioBtn.innerText = "Rejected";

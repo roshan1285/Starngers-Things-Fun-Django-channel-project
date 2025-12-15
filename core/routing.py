@@ -3,4 +3,6 @@ from . import consumers
 
 websocket_urlpatterns = [
     re_path(r'ws/radio/$', consumers.RadioConsumer.as_asgi()),
+
+    re_path(r'ws/comms/(?P<frequency>[\w.]+)/$', consumers.CommsConsumer.as_asgi()),
 ]

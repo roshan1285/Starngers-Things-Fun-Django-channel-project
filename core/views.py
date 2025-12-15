@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Friends
 from .serializers import UserSearchSerializer
+import random
 
 def signup(request):
     if request.method == "POST":
@@ -119,6 +120,12 @@ def accept_friend_request(request, user_id):
         return Response({'status':'error','message':'No incoming signal found.'})
     
     friendship.status = 2
+    
+    # --- ADD THIS LOGIC ---
+    if not friendship.frequency:
+        # Generate a random FM frequency (e.g., 94.5, 101.2)
+        freq = round(random.uniform(88.0, 108.0), 1)
+        friendship.frequency = str(freq)
     friendship.save()
 
     return Response({'status':'success','new_state':'accepted','frequency' : friendship.frequency})
@@ -141,3 +148,27 @@ def reject_friend_request(request, user_id):
 
 def test_hawkins_view(request):
     return render(request, 'test_hawkins.html')
+
+def wall_room(request, frequency):
+    # Find the specific friendship using the unique frequency
+    friendship = get_object_or_404(Friends, frequency=frequency)
+    user = request.user
+    
+    # Determine Dimension
+    # If YOU sent the request, you are in Hawkins (Normal)
+    # If YOU received it, you are in the Upside Down
+    if user == friendship.sender:
+        bg_image = 'bg/bg_1.png' # Normal Room Image
+        theme = 'hawkins'
+    else:
+        # You need a second image for this! 
+        # For now, we can use the same one or a darker version if you have it.
+        bg_image = 'bg/bg_2.png' 
+        theme = 'upsidedown'
+
+    context = {
+        'frequency': frequency,
+        'bg_image': bg_image,
+        'theme': theme
+    }
+    return render(request, 'wall_room.html', context)
