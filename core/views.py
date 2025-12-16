@@ -151,20 +151,12 @@ def test_hawkins_view(request):
 
 def wall_room(request, frequency):
     # Find the specific friendship using the unique frequency
-    friendship = get_object_or_404(Friends, frequency=frequency)
-    user = request.user
+    theme = request.GET.get('theme', 'hawkins')
     
-    # Determine Dimension
-    # If YOU sent the request, you are in Hawkins (Normal)
-    # If YOU received it, you are in the Upside Down
-    if user == friendship.sender:
+    if theme == 'hawkins':
         bg_image = 'bg/bg_1.png' # Normal Room Image
-        theme = 'hawkins'
     else:
-        # You need a second image for this! 
-        # For now, we can use the same one or a darker version if you have it.
         bg_image = 'bg/bg_2.png' 
-        theme = 'upsidedown'
 
     context = {
         'frequency': frequency,
