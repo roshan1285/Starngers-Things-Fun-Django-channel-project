@@ -18,4 +18,6 @@ urlpatterns = [
 
     path('test/', views.test_hawkins_view, name='test_hawkins_view'),
     path('wall/<str:frequency>/', views.wall_room, name='wall_room'),
+
+    path('api/status/<str:frequency>/', views.check_frequency_status , name="check_frequency_status"),
 ]

@@ -120,15 +120,23 @@
         const frequency = "{{ frequency }}"; // Get from Django context
         const theme = "{{theme}}";
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const myTheme = urlParams.get('theme') || 'hawkins';
+
         // --- WEBSOCKET CONNECTION ---
         const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
         const commsSocket = new WebSocket(
             wsScheme + '://' + window.location.host + '/ws/comms/' + frequency + '/'
         );
 
-        commsSocket.onopen = function(e){
-            console.log("connection ON.")
-        }
+        commsSocket.onopen = function(e) {
+            console.log("connection ON.");
+
+            commsSocket.send(JSON.stringify({
+                'type': 'join_dimension', 
+                'theme': myTheme
+            }));
+        };
         
         commsSocket.onmessage = function(e){
             const data = JSON.parse(e.data);

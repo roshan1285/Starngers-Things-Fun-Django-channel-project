@@ -259,6 +259,8 @@
     const btnHawkins = document.getElementById('btn-hawkins');
     const btnUpsideDown = document.getElementById('btn-upsidedown');
 
+    const statusHawkins = btnHawkins.querySelector('span:last-child'); // The "VACANT" text
+    const statusUpside = btnUpsideDown.querySelector('span:last-child');
     
 
     function configureRadioButton(status, userId) {
@@ -293,20 +295,46 @@
             dimensionControls.classList.remove('hidden');
 
             // 3. Configure Hawkins Button
-            btnHawkins.onclick = function() {
-                if (safeFreq) {
-                    // Pass ?theme=hawkins to the URL
-                    window.location.href = `/wall/${safeFreq}/?theme=hawkins`;
+            fetch(`/api/status/${safeFreq}/`)
+            .then(res => res.json())
+            .then(data => {
+                
+                // --- HAWKINS LOGIC ---
+                if (data.hawkins.occupied && !data.hawkins.is_me) {
+                    // Case A: Someone else is there
+                    btnHawkins.disabled = true;
+                    btnHawkins.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
+                    statusHawkins.innerText = "OCCUPIED";
+                    statusHawkins.classList.add('text-gray-500');
+                } else {
+                    // Case B: Empty OR It's me (allow re-entry)
+                    btnHawkins.disabled = false;
+                    btnHawkins.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
+                    statusHawkins.innerText = "VACANT";
+                    statusHawkins.classList.remove('text-gray-500');
+                    
+                    btnHawkins.onclick = () => {
+                        window.location.href = `/wall/${safeFreq}/?theme=hawkins`;
+                    };
                 }
-            };
 
-            // 4. Configure Upside Down Button
-            btnUpsideDown.onclick = function() {
-                if (safeFreq) {
-                    // Pass ?theme=upsidedown to the URL
-                    window.location.href = `/wall/${safeFreq}/?theme=upsidedown`;
+                // --- UPSIDE DOWN LOGIC ---
+                if (data.upsidedown.occupied && !data.upsidedown.is_me) {
+                    btnUpsideDown.disabled = true;
+                    btnUpsideDown.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
+                    statusUpside.innerText = "OCCUPIED";
+                    statusUpside.classList.add('text-gray-500');
+                } else {
+                    btnUpsideDown.disabled = false;
+                    btnUpsideDown.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
+                    statusUpside.innerText = "THE RIFT";
+                    statusUpside.classList.remove('text-gray-500');
+                    
+                    btnUpsideDown.onclick = () => {
+                        window.location.href = `/wall/${safeFreq}/?theme=upsidedown`;
+                    };
                 }
-            };
+            });
         }
         else if (status === 3) {
             radioBtn.innerText = "Rejected";

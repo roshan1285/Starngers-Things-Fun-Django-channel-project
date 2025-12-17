@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Friends
 from .serializers import UserSearchSerializer
+from django.http import JsonResponse
+from django.core.cache import cache
 import random
 
 def signup(request):
@@ -164,3 +166,25 @@ def wall_room(request, frequency):
         'theme': theme
     }
     return render(request, 'wall_room.html', context)
+
+def check_frequency_status(request, frequency):
+
+    key_hawkins = f'presence_{frequency}_hawkins'
+    key_upsidedown = f'presence_{frequency}_upsidedown'
+
+    hawkins_user_id = cache.get(key_hawkins)
+    upsidedown_user_id = cache.get(key_upsidedown)
+    
+    current_user_id = request.user.id
+
+    data = {
+        'hawkins': {
+            'occupied': hawkins_user_id is not None,
+            'is_me': hawkins_user_id == current_user_id
+        },
+        'upsidedown': {
+            'occupied': upsidedown_user_id is not None,
+            'is_me': upsidedown_user_id == current_user_id
+        }
+    }
+    return JsonResponse(data)
