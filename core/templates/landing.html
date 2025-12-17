@@ -1,3 +1,4 @@
+{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,11 +8,18 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
 
     <style>
         /* BASE & RESET */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @font-face {
+            font-family: 'StrangerFont';
+            src: url("{% static 'fonts/st_bold.ttf' %}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
 
         body {
             /* The Void Background */
@@ -49,40 +57,103 @@
 
         /* THE MAIN TEXT STYLE */
         h1 {
+            font-family: 'StrangerFont', serif;
             font-size: 5rem; /* Big text */
             text-transform: uppercase;
             letter-spacing: -5px; /* Tight spacing like the show */
             
             /* The Hollow Red Outline Trick */
             color: transparent; /* See-through inside */
-            -webkit-text-stroke: 3px #ed213a; /* The Red Outline */
-            
-            /* The Neon Glow */
-            text-shadow: 
-                0 0 15px rgba(237, 33, 58, 0.5),
-                0 0 30px rgba(237, 33, 58, 0.3);
+            -webkit-text-stroke: 1px #ed213a; /* The Red Outline */
+          
             
             position: relative;
             line-height: 0.9;
         }
 
+        /* FIRST LETTER BIGGER STYLE (Classic Intro Style) */
+        .big-letter-s{
+            font-size: 6.5rem;
+            vertical-align: middle;
+            position: relative; /* Required to anchor the line */
+            display: inline-block; /* Fixes width issues for lines */
+        }
+
+        /* THE SHORT LINE UNDER S and R */
+       .big-letter-s::after {
+            content: '';
+            position: absolute;
+            
+            /* Position */
+            bottom: -15px; /* Moved down slightly to account for the taller box */
+            left: 0;
+            
+            /* Size - Increased height to show the hollow effect */
+            width: 120%; 
+            height: 5px; 
+            
+            /* HOLLOW EFFECT */
+            background: transparent; /* See-through */
+            border: 1px solid #ed213a; /* The Red Outline */
+            
+            /* Glow: Outer glow + Inner glow (inset) for neon feel */
+            box-shadow: 0 0 8px rgba(237, 33, 58, 0.6), inset 0 0 5px rgba(237, 33, 58, 0.4);
+        }
+
+
+        .big-letter-r{
+            font-size: 6.5rem;
+            vertical-align: middle;
+            position: relative; /* Required to anchor the line */
+            display: inline-block; /* Fixes width issues for lines */
+        }
+
+        /* THE SHORT LINE UNDER S and R */
+        .big-letter-r::after {
+            content: '';
+            position: absolute;
+            
+            /* Position */
+            bottom: -15px; 
+            right: 0;
+            
+            /* Size */
+            width: 105%; 
+            height: 5px; 
+            
+            /* HOLLOW EFFECT */
+            background: transparent;
+            border: 1px solid #ed213a;
+            
+            /* Glow */
+            box-shadow: 0 0 8px rgba(237, 33, 58, 0.6), inset 0 0 5px rgba(237, 33, 58, 0.4);
+        }
+
         /* THE BARS ABOVE/BELOW THE TEXT */
-        h1::before, h1::after {
+        h1::before {
             content: '';
             display: block;
-            height: 3px;
-            width: 100%;
+            height: 5px;
+            width: 30%;
             background: #ed213a;
             box-shadow: 0 0 10px rgba(237, 33, 58, 0.8);
             margin: 0 auto;
+
+            /* HOLLOW EFFECT */
+            background: transparent; /* See-through */
+            border: 1px solid #ed213a; /* The Red Outline */
         }
         
-        h1::before { width: 80%; margin-bottom: 10px; } /* Top bar shorter */
+        h1::before { width: 95%; margin-bottom: 10px; } /* Top bar shorter */
         h1::after { margin-top: 10px; }
 
         /* FIRST LETTER BIGGER STYLE (Classic Intro Style) */
-        .big-letter {
-            font-size: 6.5rem;
+        .big-letter-s {
+            font-size: 7rem;
+            vertical-align: middle;
+        }
+        .big-letter-r {
+            font-size: 7rem;
             vertical-align: middle;
         }
 
@@ -155,7 +226,7 @@
 
     <div class="title-container">
         <h1>
-            <span class="big-letter">S</span>TRANGE<span class="big-letter">R</span><br>
+            <span class="big-letter-s">S</span>TRANGE<span class="big-letter-r">R</span><br>
             THINGS
         </h1>
         <p class="subtitle">WELCOME TO THE HAWKINS</p>
