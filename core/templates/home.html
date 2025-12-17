@@ -248,6 +248,13 @@
             radioAntennaTip.classList.add('bg-red-600', 'border-red-800', 'shadow-[0_0_5px_rgba(220,38,38,0.8)]');
         }
 
+        if (radioSocket.readyState === WebSocket.OPEN) {
+            radioSocket.send(JSON.stringify({
+                'type': 'watch_frequency',
+                'frequency': freq
+            }));
+        }
+
         // 3. BUTTON LOGIC (Get on same Channel)
         configureRadioButton(status, userId);
     }
@@ -447,6 +454,18 @@
             }
             // Optional: Refresh the sidebar list to show them as friend
             fetchUsers(''); 
+        }
+        else if (data.type === 'status_update_trigger') {
+            
+            // Only refresh if we are still looking at that frequency
+            if (currentFrequency === data.frequency) {
+                console.log("Live Update Received!");
+                
+                // We just re-run the configuration function.
+                // It will fetch the fresh API data and update the buttons.
+                // We need to pass the current status (2 = Accepted) and ID
+                configureRadioButton(2, currentSelectedId);
+            }
         }
         else if (data.type === 'incoming_request') {
              // If I am currently looking at the person who sent it

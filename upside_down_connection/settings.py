@@ -20,13 +20,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4%+n#w7@91)tf3ou(6upc7)#a$waof6#kwbzsw^6og=q*e1hrj'
+SECRET_KEY = 'z-kf-u54mnhb#^+f&ys*3=lskz^p6ci(4lcpr7g4$jd)d@7uxw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app', # This covers your random ngrok URLs
+    'https://*.ngrok.io',       # Old ngrok domains just in case
+    'http://localhost:8000',    # Keep local working
+    'http://127.0.0.1:8000',
+]
 
 # Application definition
 

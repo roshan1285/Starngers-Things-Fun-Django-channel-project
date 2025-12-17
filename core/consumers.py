@@ -25,6 +25,26 @@ class RadioConsumer(AsyncWebsocketConsumer):
 
     async def radio_signal(self,event):
         await self.send(text_data=json.dumps(event['data']))
+    
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+
+        if data.get('type') == 'watch_frequency':
+            frequency = data.get('frequency')
+
+            group_name = f"dashboard_{frequency}"
+            
+            await self.channel_layer.group_add(
+                group_name,
+                self.channel_name
+            )
+
+    async def force_status_update(self, event):
+        # This is the message sent from the Wall
+        await self.send(text_data=json.dumps({
+            'type': 'status_update_trigger',
+            'frequency': event['frequency']
+        }))
         
 class CommsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -56,6 +76,14 @@ class CommsConsumer(AsyncWebsocketConsumer):
             cache.delete(upside_key) # Erase name
             print(f"USER {self.user.username} checked out of Upside Down")
 
+        await self.channel_layer.group_send(
+            f"dashboard_{self.room_name}",
+            {
+                'type': 'force_status_update',
+                'frequency': self.room_name
+            }
+        )
+        
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -70,7 +98,15 @@ class CommsConsumer(AsyncWebsocketConsumer):
 
                 cache_key = f'presence_{self.room_name}_{theme}'
                 cache.set(cache_key, self.user.id, timeout=3600)
-
+                
+                await self.channel_layer.group_send(
+                    f"dashboard_{self.room_name}",
+                    {
+                        'type': 'force_status_update', # Matches the function in RadioConsumer
+                        'frequency': self.room_name
+                    }
+                )
+                    
                 # Optional: Print to console so you can see it working
                 print(f"USER {self.user.username} checked into {theme}")
 
