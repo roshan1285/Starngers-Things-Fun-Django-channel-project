@@ -3,7 +3,7 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
@@ -64,16 +64,41 @@ def search_users(request):
     user = request.user
 
     if query:
+
+        frequency_matching_friends = Friends.objects.filter(
+              (Q(sender=user) | Q(receiver=user)) | Q( frequency__icontains=query )# & Q(status=2)
+        ).annotate(status_order=Case(
+            When(status="2",then=Value(1)),
+            When(status="1",then=Value(2)),
+            When(status="3",then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField(),
+        )).order_by('status_order')
+        print(frequency_matching_friends)
         # PROFESSIONAL LOGIC:
         # 1. Search ALL users matching the name
         # 2. Exclude the superuser or yourself if you want
-        users = User.objects.filter(username__icontains=query).exclude(id=user.id)[:10]
+        friendship_frequency_matching_user_ids = set()
+        for f in frequency_matching_friends:
+            friendship_frequency_matching_user_ids.add(f.sender.id)
+            friendship_frequency_matching_user_ids.add(f.receiver.id)
+        print(friendship_frequency_matching_user_ids)
+        users = User.objects.filter( Q(username__icontains=query) | Q(id__in=friendship_frequency_matching_user_ids)).exclude(id=user.id)[:10]
+        print("users: ", users)
     else:
         # DEFAULT: Show only my accepted friends (Limit 10)
         # We find friend IDs first
+
         friend_ships = Friends.objects.filter(
-            (Q(sender=user) | Q(receiver=user)) & Q(status=2)
-        )
+            (Q(sender=user) | Q(receiver=user))  & Q(status='2')
+        ).annotate(status_order=Case(
+            When(status="2",then=Value(1)),
+            When(status="1",then=Value(2)),
+            When(status="3",then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField(),
+        )).order_by('status_order')
+
         # Extract the IDs of the OTHER person
         friend_ids = []
         for f in friend_ships:
